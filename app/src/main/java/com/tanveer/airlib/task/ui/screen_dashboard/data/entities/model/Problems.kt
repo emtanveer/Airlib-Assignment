@@ -1,6 +1,7 @@
 package com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 
@@ -8,49 +9,54 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ProblemsResponseModel(
-    val problems: List<Problem>
-) : Parcelable {}
+    @SerializedName("problems") val problems: List<Problem>
+) : Parcelable
 
-// Problem model class
 @Parcelize
 data class Problem(
-    val name: String,
-    val medications: List<Medication>? = null,
-    val labs: List<Lab>? = null
-) : Parcelable {}
+    @SerializedName("Diabetes") val diabetes: List<Diabetes>? = null,
+    @SerializedName("Asthma") val asthma: List<Asthma>? = null
+) : Parcelable
 
-// Medication model class
+@Parcelize
+data class Diabetes(
+    @SerializedName("medications") val medications: List<Medication>,
+    @SerializedName("labs") val labs: List<Lab>
+) : Parcelable
+
 @Parcelize
 data class Medication(
-    val medicationsClasses: List<MedicationClass>
-) : Parcelable {}
+    @SerializedName("medicationsClasses") val medicationsClasses: List<MedicationClass>
+) : Parcelable
 
-// MedicationClass model class
 @Parcelize
 data class MedicationClass(
-    val className: List<ClassDetail>? = null,
-    val className2: List<ClassDetail>? = null
-) : Parcelable {}
+    @SerializedName("className") val className: List<DrugInfo>,
+    @SerializedName("className2") val className2: List<DrugInfo>
+) : Parcelable
 
-// ClassDetail model class
 @Parcelize
-data class ClassDetail(
-    val associatedDrug: List<AssociatedDrug>? = null,
-    val associatedDrug2: List<AssociatedDrug>? = null // Changed to `associatedDrug2` for proper naming
-) : Parcelable {}
+data class DrugInfo(
+    @SerializedName("associatedDrug") val associatedDrug: List<Drug>,
+    @SerializedName("associatedDrug#2") val associatedDrug2: List<Drug>
+) : Parcelable
 
-// AssociatedDrug model class
 @Parcelize
-data class AssociatedDrug(
-    val name: String,
-    val dose: String,
-    val strength: String
-) : Parcelable {}
+data class Drug(
+    @SerializedName("name") val name: String,
+    @SerializedName("dose") val dose: String,
+    @SerializedName("strength") val strength: String
+) : Parcelable
 
-// Lab model class
 @Parcelize
 data class Lab(
-    val missing_field: String // You can rename this to something more meaningful
-) : Parcelable {}
+    @SerializedName("missing_field") val missingField: String
+) : Parcelable
+
+@Parcelize
+data class Asthma(
+    @SerializedName("placeholder") val placeholder: List<Asthma>? = emptyList()
+) : Parcelable
+
 
 //endregion
