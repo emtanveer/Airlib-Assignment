@@ -1,15 +1,15 @@
 package com.tanveer.airlib.task.unit_testings.screen_dashboard.presentation.viewmodels
 
 
+import com.tanveer.airlib.task.shared.business.use_cases.GetUsernameUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.business.use_cases.ExtractDrugsUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.business.use_cases.GreetingsGeneratorUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.business.use_cases.ProblemsListingUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.ProblemsResponseModel
 import com.tanveer.airlib.task.ui.screen_dashboard.presentation.DashboardViewModel
-import com.tanveer.airlib.task.unit_testings.screen_dashboard.presentation.utils.MainDispatcherRule
 import com.tanveer.airlib.task.unit_testings.screen_dashboard.presentation.utils.ProblemsResponseModelFactory
-import dagger.hilt.android.testing.HiltAndroidRule
+import com.tanveer.airlib.task.unit_testings.shared.presentation.utils.MainDispatcherRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -40,6 +40,9 @@ class DashboardViewModelTest {
     @MockK
     lateinit var greetingUseCase: GreetingsGeneratorUseCase
 
+    @MockK
+    lateinit var getUsernameUseCase: GetUsernameUseCase
+
     private lateinit var dashboardViewModel: DashboardViewModel
     private lateinit var problemsResponseModel: ProblemsResponseModel
 
@@ -49,7 +52,7 @@ class DashboardViewModelTest {
         MockKAnnotations.init(this)
 
         dashboardViewModel =
-            DashboardViewModel(getProblemsUseCase, extractDrugsUseCase, greetingUseCase)
+            DashboardViewModel(getProblemsUseCase, extractDrugsUseCase, greetingUseCase, getUsernameUseCase)
 
         val factory = ProblemsResponseModelFactory()
         problemsResponseModel = factory.create()

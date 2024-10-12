@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,21 +15,32 @@ import androidx.navigation.navArgument
 import com.google.gson.Gson
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
 import com.tanveer.airlib.task.ui.screen_dashboard.presentation.DashboardScreen
+import com.tanveer.airlib.task.ui.screen_dashboard.presentation.DashboardViewModel
+import com.tanveer.airlib.task.ui.screen_login.presentation.LoginScreen
+import com.tanveer.airlib.task.ui.screen_login.presentation.LoginViewModel
 import com.tanveer.airlib.task.ui.screen_medicine_detail.presentation.MedicineDetailScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavGraph(startDestination: String = "dashboard/{username}") {
+fun NavGraph(startDestination: String = "login") {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = startDestination) {
+        composable("login") {
+            val loginViewModel: LoginViewModel = hiltViewModel()
 
-        composable(
-            route = "dashboard/{username}",
-            arguments = listOf(navArgument("username") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username") ?: "Guest"
-            DashboardScreen(username = username, navController = navController)
+            LoginScreen(
+                loginViewModel = loginViewModel,
+                navController = navController
+            )
+        }
+
+        composable(route = "dashboard") {
+            val dashboardViewModel: DashboardViewModel = hiltViewModel()
+            DashboardScreen(
+                dashboardViewModel,
+                navController = navController
+            )
         }
 
         composable(

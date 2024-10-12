@@ -3,6 +3,7 @@ package com.tanveer.airlib.task.ui.screen_dashboard.presentation
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,30 +36,49 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.gson.Gson
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
-import com.tanveer.airlib.task.ui.screen_dashboard.presentation.utils.MockExtractDrugsUseCase
-import com.tanveer.airlib.task.ui.screen_dashboard.presentation.utils.MockGreetingsGeneratorUseCase
-import com.tanveer.airlib.task.ui.screen_dashboard.presentation.utils.MockProblemsListingUseCase
+import com.tanveer.airlib.task.ui.screen_dashboard.presentation.extensions.capitalizeFirstChar
+import com.tanveer.airlib.task.ui.screen_dashboard.presentation.utils.ExitConfirmationDialog
+import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardScreen(
-    username: String,
     dashboardViewModel: DashboardViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController()
 ) {
     val state by dashboardViewModel.uiState.collectAsState()
+    val username by dashboardViewModel.usernameState.collectAsState()
+
+    var drugs by remember { mutableStateOf(emptyList<Drug>()) }
     var greetingMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
+
         // Fetch the Problem and Medication List from Api when the composable is first composed
         dashboardViewModel.fetchProblemList()
 
         // Fetch the greetings message when the composable is first composed
         greetingMessage = dashboardViewModel.getGreetingMessage()
-    }
-    ShouldShowDashboardContent(navController, state, dashboardViewModel, username, greetingMessage)
 
+        dashboardViewModel.fetchAndUpdateUsername()
+    }
+
+    // Fetching updated problemList here
+    LaunchedEffect(state.problems) {
+        drugs = dashboardViewModel.extractDrugs(state.problems)
+    }
+
+    ShouldShowDashboardContent(
+        navController,
+        state,
+        username,
+        drugs,
+        greetingMessage
+    )
+
+    HandleExitExperience()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -65,16 +86,10 @@ fun DashboardScreen(
 fun ShouldShowDashboardContent(
     navController: NavHostController,
     state: DashboardProblemListViewState,
-    dashboardViewModel: DashboardViewModel,
-    username: String,
+    fetchedUserState: DashboardFetchUserViewState,
+    drugs: List<Drug>,
     greetingMessage: String
 ) {
-    var drugs by remember { mutableStateOf(emptyList<Drug>()) }
-
-    // Fetching updated problemList here
-    LaunchedEffect(state.problems) {
-        drugs = dashboardViewModel.extractDrugs(state.problems)
-    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -89,7 +104,7 @@ fun ShouldShowDashboardContent(
         ) {
             // Greeting message
             Text(
-                text = "$greetingMessage, $username!",
+                text = "$greetingMessage, ${fetchedUserState.fetchUser?.username?.capitalizeFirstChar() ?: "User"}!",
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp
@@ -135,40 +150,58 @@ fun ShouldShowDashboardContent(
     }
 }
 
+@Composable
+fun HandleExitExperience() {
+    val coroutineScope = rememberCoroutineScope()
+
+    var backPressCount by remember { mutableStateOf(0) }
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Handle back press
+    BackHandler(enabled = true) {
+        backPressCount++
+
+        if (backPressCount == 1) {
+            // Show the exit confirmation dialog
+            showExitDialog = true
+        } else {
+            // If back pressed again, exit the app
+            showExitDialog = true
+        }
+
+        // Reset back press count and exit dialog visibility after a delay
+        if (backPressCount > 1) {
+            // Launch a coroutine in response to back press
+            coroutineScope.launch {
+                kotlinx.coroutines.delay(1000) // 2 seconds
+                backPressCount = 0
+                showExitDialog = false // Hide dialog after 2 seconds
+            }
+        }
+    }
+
+    // Show exit confirmation dialog if needed
+    if (showExitDialog) {
+        ExitConfirmationDialog(
+            onConfirm = {
+                coroutineScope.launch {
+                    kotlinx.coroutines.delay(1000)
+                }
+                // Handle exit confirmation
+                exitProcess(0)
+            },
+            onDismiss = {
+                // Dismiss the dialog
+                showExitDialog = false
+                backPressCount = 0
+            }
+        )
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun PreviewShouldShowDashboardContent() {
-    val navController = rememberNavController()
 
-    // Sample DashboardProblemListViewState with mock data
-    val sampleState = DashboardProblemListViewState(
-        isLoading = false,
-        error = "",
-        problems = listOf()
-    )
-
-    // Mock use cases
-    val mockProblemsListingUseCase = MockProblemsListingUseCase()
-    val mockExtractDrugsUseCase = MockExtractDrugsUseCase()
-    val mockGreetingsGeneratorUseCase = MockGreetingsGeneratorUseCase()
-
-    // DashboardViewModel with the mock use cases
-    val dashboardViewModel = DashboardViewModel(
-        getProblemsUseCase = mockProblemsListingUseCase,
-        extractDrugsUseCase = mockExtractDrugsUseCase,
-        greetingUseCase = mockGreetingsGeneratorUseCase
-    )
-
-    // Sample username and greeting message
-    val username = "Test User"
-    val greetingMessage = "Good Morning"
-
-    ShouldShowDashboardContent(
-        navController = navController,
-        state = sampleState,
-        dashboardViewModel = dashboardViewModel,
-        username = username,
-        greetingMessage = greetingMessage
-    )
 }
