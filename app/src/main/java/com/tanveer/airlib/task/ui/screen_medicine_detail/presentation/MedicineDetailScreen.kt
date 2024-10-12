@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
@@ -47,9 +48,7 @@ fun DrugDetailView(drug: Drug?) {
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -77,19 +76,21 @@ fun DrugDetailRow(label: String, value: String?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 40.dp, bottom = 20.dp),
+            .padding(start = 30.dp, bottom = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.Underline),
             modifier = Modifier
-                .weight(1.5f)
+                .weight(1f)
         )
         Text(
             text = value ?: "N/A",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

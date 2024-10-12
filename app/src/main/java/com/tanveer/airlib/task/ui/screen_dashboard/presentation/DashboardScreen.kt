@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,6 @@ import com.google.gson.Gson
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
 import com.tanveer.airlib.task.ui.screen_dashboard.presentation.extensions.capitalizeFirstChar
 import com.tanveer.airlib.task.ui.screen_dashboard.presentation.utils.ExitConfirmationDialog
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -64,8 +64,6 @@ fun DashboardScreen(
         // Fetch the greetings message when the composable is first composed
         greetingMessage = dashboardViewModel.getGreetingMessage()
 
-
-        delay(2000)
     }
 
     // Fetching updated problemList here
@@ -112,7 +110,9 @@ fun ShouldShowDashboardContent(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -206,5 +206,4 @@ fun HandleExitExperience() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewShouldShowDashboardContent() {
-
 }

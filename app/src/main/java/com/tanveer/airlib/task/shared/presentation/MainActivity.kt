@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import com.tanveer.airlib.task.shared.presentation.navigation.NavGraph
 import com.tanveer.airlib.task.shared.presentation.theme.AirlibTaskTheme
+import com.tanveer.airlib.task.shared.presentation.utils.setupFullScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -17,6 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AirlibTaskTheme {
+                setupFullScreen(window)
                 NavGraph()
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
 
@@ -37,9 +38,9 @@ fun MedicineCard(drug: Drug,  onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Name: ${drug.name}", style = MaterialTheme.typography.bodyLarge)
-            Text(text = "Dose: ${drug.dose}", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Strength: ${drug.strength}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Name: ${drug.name}", style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = "Dose: ${drug.dose}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = "Strength: ${drug.strength}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
