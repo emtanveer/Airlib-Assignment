@@ -1,8 +1,17 @@
 package com.tanveer.airlib.task.shared.data.di
 
+import android.app.Application
 import com.tanveer.airlib.task.shared.business.network_utils.WebConstants.BASE_URL
+import com.tanveer.airlib.task.shared.business.repository_impl.DatabaseRepositoryImpl
+import com.tanveer.airlib.task.shared.business.use_cases.GetUsernameUseCase
+import com.tanveer.airlib.task.shared.business.use_cases.GetUsernameUseCaseImpl
+import com.tanveer.airlib.task.shared.business.use_cases.SaveUsernameUseCase
+import com.tanveer.airlib.task.shared.business.use_cases.SaveUsernameUseCaseImpl
+import com.tanveer.airlib.task.shared.data.db.AppDatabase
+import com.tanveer.airlib.task.shared.data.db.UserDao
 import com.tanveer.airlib.task.shared.data.di.AppModule.provideApiService
 import com.tanveer.airlib.task.shared.data.di.AppModule.provideProblemRepository
+import com.tanveer.airlib.task.shared.data.repository.DatabaseRepository
 import com.tanveer.airlib.task.shared.presentation.utils.Clock
 import com.tanveer.airlib.task.shared.presentation.utils.GreetingGenerator
 import com.tanveer.airlib.task.shared.presentation.utils.SystemClock
@@ -35,6 +44,8 @@ import javax.inject.Singleton
 @Module
 
 object AppModule {
+
+    //region Application
     // OkHttpClient instance used for network communication.
     private val client = OkHttpClient()
 
@@ -74,6 +85,7 @@ object AppModule {
     ): GreetingsGeneratorUseCase {
         return GreetingsGeneratorUseCaseImpl(greetingGenerator)
     }
+    //endregion
 
     //region Used for Unit Testing Greetings according to Time.
     @Provides
@@ -85,6 +97,41 @@ object AppModule {
     @Provides
     fun provideGreetingGenerator(clock: Clock): GreetingGenerator {
         return GreetingGenerator(clock)
+    }
+    //endregion
+
+    //region Room DB
+    @Provides
+    @Singleton
+    fun provideDatabase(app: Application): AppDatabase {
+        return AppDatabase.getDatabase(app)
+    }
+
+    @Provides
+    fun provideLoginUserDao(db: AppDatabase): UserDao {
+        return db.loginUserDao()
+    }
+
+    @Provides
+    fun provideLoginRepository(dao: UserDao): DatabaseRepository {
+        return DatabaseRepositoryImpl(dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSaveUsernameUseCase(
+        repository: DatabaseRepository
+    ): SaveUsernameUseCase {
+        return SaveUsernameUseCaseImpl(repository)
+    }
+
+    // Provide the GetUsernameUseCase
+    @Provides
+    @Singleton
+    fun provideGetUsernameUseCase(
+        repository: DatabaseRepository
+    ): GetUsernameUseCase {
+        return GetUsernameUseCaseImpl(repository)
     }
     //endregion
 }

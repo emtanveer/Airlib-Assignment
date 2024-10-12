@@ -1,4 +1,4 @@
-package com.tanveer.airlib.task.unit_testings.screen_dashboard.presentation.utils
+package com.tanveer.airlib.task.unit_testings.shared.presentation.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -1,7 +1,9 @@
 package com.tanveer.airlib.task.ui.screen_dashboard.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tanveer.airlib.task.shared.business.use_cases.GetUsernameUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.business.use_cases.ExtractDrugsUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.business.use_cases.GreetingsGeneratorUseCase
 import com.tanveer.airlib.task.ui.screen_dashboard.business.use_cases.ProblemsListingUseCase
@@ -18,11 +20,17 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     private val getProblemsUseCase: ProblemsListingUseCase,
     private val extractDrugsUseCase: ExtractDrugsUseCase,
-    private val greetingUseCase: GreetingsGeneratorUseCase
+    private val greetingUseCase: GreetingsGeneratorUseCase,
+    private val getUsernameUseCase: GetUsernameUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardProblemListViewState())
     val uiState: StateFlow<DashboardProblemListViewState> = _uiState.asStateFlow()
+
+    // StateFlow to hold the fetched username state
+    private val _usernameState = MutableStateFlow(DashboardFetchUserViewState())
+    val usernameState: StateFlow<DashboardFetchUserViewState> = _usernameState.asStateFlow()
+
 
     //region Fetch the list of problems and medications
     fun fetchProblemList() {
@@ -53,6 +61,17 @@ class DashboardViewModel @Inject constructor(
     //region Greetings use-case
     suspend fun getGreetingMessage(): String {
         return greetingUseCase.invoke()
+    }
+    //endregion
+
+    //region Fetch username and update StateFlow
+    suspend fun fetchAndUpdateUsername() {
+            try {
+                val user = getUsernameUseCase.invoke()
+                _usernameState.value = _usernameState.value.copy(user)
+            } catch (e: Exception) {
+                Log.e("DashboardViewModel", "Error fetching username", e)
+            }
     }
     //endregion
 }
