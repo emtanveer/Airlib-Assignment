@@ -19,7 +19,7 @@ class LoginViewModel @Inject constructor(
     private val getUsernameUseCase: GetUsernameUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UserEntity(""))
+    private val _uiState = MutableStateFlow(UserEntity(0,""))
     val uiState: StateFlow<UserEntity> = _uiState.asStateFlow()
 
     fun onUsernameChange(newUsername: String) {

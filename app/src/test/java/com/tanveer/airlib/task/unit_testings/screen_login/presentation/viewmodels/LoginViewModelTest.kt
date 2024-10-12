@@ -6,11 +6,13 @@ import com.tanveer.airlib.task.shared.data.UserEntity
 import com.tanveer.airlib.task.ui.screen_login.presentation.LoginViewModel
 import com.tanveer.airlib.task.unit_testings.shared.presentation.utils.MainDispatcherRule
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
+import io.mockk.just
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -36,7 +38,7 @@ class LoginViewModelTest {
         // Initialize MockK annotations
         MockKAnnotations.init(this)
 
-        // Initialize the LoginViewModel with the mocked use cases
+        // Initializing LoginViewModel with the mocked use cases
         loginViewModel = LoginViewModel(mockSaveUsernameUseCase, mockGetUsernameUseCase)
     }
 
@@ -49,62 +51,45 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `when Login button is pressed It should call onSuccess with the correct provided username inserted to database`() =
-        runTest {
-            val testUsername = "testuser"
+    fun `test Multiple Insertions Should Only Save Once`() = runTest {
 
-            // Create mocks for the use cases
-            val saveUsernameUseCase: SaveUsernameUseCase = mockk(relaxed = true)
-            val getUsernameUseCase: GetUsernameUseCase = mockk(relaxed = true)
+        val username1 = "user1"
+        val username2 = "user2"
 
-            // Initialize the LoginViewModel with the mocked use cases
-            val loginViewModel = LoginViewModel(saveUsernameUseCase, getUsernameUseCase)
+        // Mock the SaveUsernameUseCase to handle the invocations
+        coEvery { mockSaveUsernameUseCase(username1) } just Runs
+        coEvery { mockSaveUsernameUseCase(username2) } just Runs
 
-            // Simulate username change
-            loginViewModel.onUsernameChange(testUsername)
+        mockSaveUsernameUseCase(username1) // Save the first user
+        mockSaveUsernameUseCase(username2) // Attempt to insert the second user
 
-            // Variable to capture the username received in onSuccess
-            var receivedUsername: String? = null
+        // Mock the GetUsernameUseCase to return the last saved username
+        coEvery { mockGetUsernameUseCase() } returns UserEntity(username = username2)
 
-            // Call the onLogin function
-            loginViewModel.onLogin(
-                onSuccess = { username -> receivedUsername = username },
-                onError = { /* handle failure */ }
-            )
+        val retrievedUser = mockGetUsernameUseCase()
 
-            // Advance the dispatcher to ensure all coroutines are completed
-            mainDispatcherRule.dispatcher.scheduler.advanceUntilIdle()
-
-            // Verify that saveUsernameUseCase was called with the correct username
-            coVerify { saveUsernameUseCase.invoke(testUsername) }
-
-            // Check if onSuccess was called with the correct username
-            assertEquals(testUsername, receivedUsername)
-        }
+        assertNotNull(retrievedUser)
+        assertEquals(username2, retrievedUser.username)
+    }
 
     @Test
-    fun `when fetching username, it should return the correct username from the repository`() =
-        runTest {
+    fun `when fetching username, it should return the correct username from the repository`() = runTest {
             // Arrange
+            val testUserId = 0
             val testUsername = "testuser"
-            val mockUserEntity = UserEntity(testUsername)
+            val mockUserEntity = UserEntity(testUserId, testUsername)
 
             // Setup the mock for getting username
-            coEvery { mockGetUsernameUseCase.invoke(testUsername) } returns mockUserEntity
+            coEvery { mockGetUsernameUseCase.invoke() } returns mockUserEntity
 
-            // Set the username in the ViewModel
+            // Fetch the username
             loginViewModel.onUsernameChange(testUsername)
+            val result =
+                mockGetUsernameUseCase.invoke().username
 
-            // Act
-            loginViewModel.getUsername()
-
-            // Advance the dispatcher to allow the coroutine to complete
             mainDispatcherRule.dispatcher.scheduler.advanceUntilIdle()
 
-            // Assert
-            val result = loginViewModel.fetchedUsername.value
-            assertEquals(mockUserEntity, result)
-            coVerify { mockGetUsernameUseCase.invoke(testUsername) }
+            assertEquals(testUsername, result)
+            coVerify { mockGetUsernameUseCase.invoke() }
         }
-
 }

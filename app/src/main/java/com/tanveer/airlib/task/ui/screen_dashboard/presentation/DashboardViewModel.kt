@@ -68,7 +68,7 @@ class DashboardViewModel @Inject constructor(
     suspend fun fetchAndUpdateUsername() {
             try {
                 val user = getUsernameUseCase.invoke()
-                _usernameState.value = _usernameState.value.copy(user)
+                _usernameState.value = _usernameState.value.copy(fetchUser = user)
             } catch (e: Exception) {
                 Log.e("DashboardViewModel", "Error fetching username", e)
             }

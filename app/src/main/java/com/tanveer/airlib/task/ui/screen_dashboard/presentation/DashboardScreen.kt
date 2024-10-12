@@ -38,6 +38,7 @@ import com.google.gson.Gson
 import com.tanveer.airlib.task.ui.screen_dashboard.data.entities.model.Drug
 import com.tanveer.airlib.task.ui.screen_dashboard.presentation.extensions.capitalizeFirstChar
 import com.tanveer.airlib.task.ui.screen_dashboard.presentation.utils.ExitConfirmationDialog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -55,6 +56,7 @@ fun DashboardScreen(
     var greetingMessage by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
+        dashboardViewModel.fetchAndUpdateUsername()
 
         // Fetch the Problem and Medication List from Api when the composable is first composed
         dashboardViewModel.fetchProblemList()
@@ -62,7 +64,8 @@ fun DashboardScreen(
         // Fetch the greetings message when the composable is first composed
         greetingMessage = dashboardViewModel.getGreetingMessage()
 
-        dashboardViewModel.fetchAndUpdateUsername()
+
+        delay(2000)
     }
 
     // Fetching updated problemList here

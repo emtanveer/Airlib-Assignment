@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.tanveer.airlib.task.shared.data.UserEntity
 
-@Database(entities = [UserEntity::class], version = 3)
+@Database(entities = [UserEntity::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun loginUserDao(): UserDao
 

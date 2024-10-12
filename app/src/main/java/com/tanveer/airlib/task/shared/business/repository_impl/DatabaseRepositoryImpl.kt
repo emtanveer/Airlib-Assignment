@@ -6,7 +6,8 @@ import com.tanveer.airlib.task.shared.data.repository.DatabaseRepository
 
 class DatabaseRepositoryImpl(private val dao: UserDao) : DatabaseRepository {
     override suspend fun saveUsername(username: String) {
-        val user = UserEntity(username)
+        // Always insert with the same ID (0) to replace existing user
+        val user = UserEntity(id = 0, username = username)
         dao.insertUser(user)
     }
 

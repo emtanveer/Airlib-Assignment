@@ -16,12 +16,15 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +35,7 @@ fun LoginScreen(
 ) {
     val state by loginViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -48,18 +52,23 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = {
-                loginViewModel.onLogin(
-                    onSuccess = {
-                        // Navigate to the dashboard after saving the username
-                        navController.navigate(route = "dashboard") {
-                            popUpTo("login") { inclusive = true }
+
+                    loginViewModel.onLogin(
+                        onSuccess = {
+                            coroutineScope.launch {
+                                delay(1000L)  // 3-second delay
+                                // Navigate to the dashboard after saving the username
+                                navController.navigate(route = "dashboard") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        },
+                        onError = { error ->
+                            Log.e("LoginScreen", "Error: ${error.message}") // Log error messages
+                            Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    onError = { error ->
-                        Log.e("LoginScreen", "Error: ${error.message}") // Log error messages
-                        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-                    }
-                )
+                    )
+
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = state.username.isNotBlank()
