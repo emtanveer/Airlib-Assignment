@@ -1,0 +1,133 @@
+// App-level build.gradle.kts
+plugins {
+    alias(libs.plugins.android.application) // Apply the Android application plugin
+    alias(libs.plugins.jetbrains.kotlin.android) // Apply the Kotlin Android plugin
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'dagger.hilt.android.plugin' // Hilt plugin
+}
+
+android {
+    namespace 'com.tanveer.airlib.task'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.tanveer.airlib.task"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.5.1"
+    }
+    packagingOptions {
+        excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        // Exclude the duplicate files
+        exclude 'META-INF/gradle/incremental.annotation.processors'
+    }
+}
+
+final composeDependencies = [
+        // Material Design 3
+        material3ForCompose    : "androidx.compose.material3:material3:$compose_material3_version",
+        // or Material Design 2
+        material2ForCompose    : "androidx.compose.material:material:$compose_ui_version",
+        // or only import the main APIs for the underlying toolkit systems,
+        // such as input and measurement/layout
+        composeUi              : "androidx.compose.ui:ui:$compose_ui_version",
+        // Android Studio Preview support
+        composeUiToolingPreview: "androidx.compose.ui:ui-tooling-preview:$compose_ui_version",
+        // Optional - Integration with activities
+        composeForActivity     : "androidx.activity:activity-compose:$compose_activity_version",
+        // Optional - Integration with ViewModels
+        composeForViewModels   : "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_viewmodel_version",
+        // Optional - Integration with LiveData
+        composeForLiveData     : "androidx.compose.runtime:runtime-livedata:$compose_lifedata",
+        // Material extended icon packs
+        materialIconExtended   : "androidx.compose.material:material-icons-extended:$compose_extended_icon_version"
+]
+
+final hiltInjection = [
+        hilt                     : "com.google.dagger:hilt-android:$hilt_android",
+        hiltNavigationFragment   : "androidx.hilt:hilt-navigation-fragment:$hilt_navigation",
+        //Compose
+        hiltComposeNavigation    : "androidx.hilt:hilt-navigation-compose:$hilt_navigation",
+        androidTestImplementation: "com.google.dagger:hilt-android-testing:$hilt_android",
+        kaptAndroidTest          : "com.google.dagger:hilt-compiler:$hilt_android",
+]
+
+
+final supportDependencies = [
+        //MultiDex
+        multiDex         : "androidx.multidex:multidex:$multidex_version",
+        composeFoundation: "androidx.compose.foundation:foundation:$compose_foundation_version",
+        coroutineTest    : "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutine_test",
+
+        // AndroidX Test dependencies
+        androidTestImplementation : 'androidx.test.ext:junit:1.1.5', // Update to the latest version
+        androidTestImplementation :'androidx.test:runner:1.5.2', // Update to the latest version
+        androidTestImplementation :'androidx.test.espresso:espresso-core:3.5.1', // Update to the latest version
+]
+
+
+dependencies {
+
+    //All required Compose Library
+    implementation composeDependencies.values()
+
+    // Hilt
+    implementation hiltInjection.values()
+   implementation libs.androidx.junit.ktx
+    debugImplementation libs.ui.tooling
+    kapt libs.hilt.compiler
+
+    //Support Dependencies
+    implementation supportDependencies.values()
+
+
+    // Room
+    implementation libs.androidx.room.runtime
+    //noinspection KaptUsageInsteadOfKsp
+    kapt libs.androidx.room.compiler
+    implementation libs.androidx.room.ktx
+
+    // Retrofit for networking
+    implementation libs.retrofit
+    implementation libs.converter.gson
+
+    // Coroutines
+    implementation libs.kotlinx.coroutines.android
+
+    // Testing
+    testImplementation libs.junit
+    testImplementation libs.androidx.core.testing
+    testImplementation libs.mockk
+
+   // Android Testing
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}
